@@ -1,0 +1,80 @@
+/* Products page styles – imported by src/pages/products.tsx (also needs page-common.css + index.css) */
+
+/* Hero: jump-to-product panel */
+.pp-jump { padding: 28px 30px 20px; border: 1px solid rgb(255 255 255 / 14%); border-radius: 5px 50px 5px 5px; background: rgb(255 255 255 / 6%); backdrop-filter: blur(4px); box-shadow: 0 26px 56px rgb(0 0 0 / 22%); }
+.pp-jump h2 { margin: 0 0 12px; color: var(--brand-gold); font: 800 11px/1.3 var(--font-heading); letter-spacing: .15em; text-transform: uppercase; }
+.pp-jump ol { display: grid; grid-template-columns: 1fr 1fr; gap: 0 26px; margin: 0; padding: 0; list-style: none; }
+.pp-jump a { display: flex; align-items: center; gap: 10px; padding: 10px 0; color: #e8eef9; border-bottom: 1px solid rgb(255 255 255 / 12%); font-size: 13px; font-weight: 600; transition: color .2s ease, padding-left .2s ease; }
+.pp-jump a span { color: var(--brand-gold); font: 800 10px var(--font-heading); letter-spacing: .08em; }
+.pp-jump a:hover { padding-left: 4px; color: var(--brand-gold); }
+
+/* Size guide */
+.pp-guide-tamil { margin-top: 10px !important; color: var(--brand-blue) !important; font: 600 13px/1.7 'Noto Sans Tamil', sans-serif !important; }
+.pp-size-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; max-width: 920px; margin-inline: auto; }
+.pp-size { position: relative; overflow: hidden; padding: 34px 32px 30px; border: 1px solid #e6eaf0; border-top: 3px solid var(--brand-gold); border-radius: 5px; background: var(--paper); }
+.pp-size-number { position: absolute; top: 6px; right: 22px; color: rgb(0 58 143 / 10%); font: 800 112px/1 var(--font-heading); letter-spacing: -.08em; pointer-events: none; }
+.pp-size-label { position: relative; display: inline-block; padding: 6px 11px; color: var(--brand-blue); border: 1px solid rgb(0 58 143 / 20%); border-radius: 3px; font: 800 10px var(--font-heading); letter-spacing: .12em; text-transform: uppercase; }
+.pp-size h3 { position: relative; margin: 18px 0 18px; color: var(--heading-ink); font: 800 24px/1.2 var(--font-heading); letter-spacing: -.045em; }
+.pp-size ul { position: relative; display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.pp-size li { display: flex; align-items: flex-start; gap: 10px; color: #25334a; font-size: 13px; font-weight: 600; line-height: 1.55; }
+.pp-size li > span { display: grid; width: 20px; height: 20px; flex: none; place-items: center; color: var(--brand-red); border-radius: 50%; background: #fff0e8; }
+.pp-size li em { color: var(--brand-blue); font: 500 12px 'Noto Sans Tamil', sans-serif; font-style: normal; }
+.pp-size--featured { color: white; border-color: transparent; border-top-color: var(--brand-gold); background: linear-gradient(135deg, #08152f, #003a8f); box-shadow: 0 22px 48px rgb(8 21 47 / 18%); }
+.pp-size--featured .pp-size-number { color: rgb(255 255 255 / 8%); }
+.pp-size--featured .pp-size-label { color: #ffdc56; border-color: rgb(255 196 0 / 40%); }
+.pp-size--featured h3 { color: white; }
+.pp-size--featured li { color: #e8eef9; }
+.pp-size--featured li > span { color: var(--deep-navy); background: var(--brand-gold); }
+.pp-size--featured li em { color: #ffdc56; }
+
+/* Product cards */
+.pp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
+.pp-card { display: flex; flex-direction: column; overflow: hidden; border: 1px solid #e6eaf0; border-top: 3px solid transparent; border-radius: 5px; background: #fff; box-shadow: 0 10px 28px rgb(8 21 47 / 4%); transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease, opacity .7s ease; }
+.pp-card:hover { border-top-color: var(--brand-red); box-shadow: 0 20px 38px rgb(8 21 47 / 10%); transform: translateY(-5px); }
+.pp-card--flagship { grid-column: 1 / -1; flex-direction: row; }
+.pp-media { position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: #d6d8db; color: #25334a; font-size: 11px; }
+.pp-media img { width: 100%; height: 100%; object-fit: cover; }
+.pp-card--flagship .pp-media { flex: 0 0 46%; aspect-ratio: auto; min-height: 380px; }
+.pp-number { position: absolute; top: 14px; left: 14px; padding: 6px 10px; color: white; border-radius: 3px; background: var(--deep-navy); font: 800 11px var(--font-heading); letter-spacing: .08em; }
+.pp-tag { position: absolute; top: 14px; right: 14px; padding: 6px 10px; color: white; border-radius: 3px; background: var(--brand-red); font: 800 9px var(--font-heading); letter-spacing: .12em; text-transform: uppercase; }
+.pp-body { display: flex; flex: 1; flex-direction: column; padding: 28px 28px 26px; }
+.pp-body h3 { margin: 0 0 4px; color: var(--heading-ink); font: 800 23px/1.2 var(--font-heading); letter-spacing: -.045em; }
+.pp-tamil { margin-bottom: 14px; color: var(--brand-blue); font: 500 12px 'Noto Sans Tamil', sans-serif; }
+.pp-body > p { margin: 0 0 16px; color: #596678; font-size: 13px; line-height: 1.8; }
+.pp-bullets { display: grid; gap: 9px; margin: 0 0 24px; padding: 0; list-style: none; }
+.pp-bullets li { display: flex; align-items: flex-start; gap: 10px; color: #25334a; font-size: 12px; font-weight: 600; line-height: 1.55; }
+.pp-bullets li > span { display: grid; width: 18px; height: 18px; flex: none; place-items: center; color: var(--brand-red); border-radius: 50%; background: #fff0e8; }
+.pp-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: auto; }
+.button.pp-btn-wa { color: var(--deep-navy); border-color: #d5dbe6; background: #fff; box-shadow: none; }
+.button.pp-btn-wa:hover { border-color: var(--brand-gold); background: #fffbea; }
+
+/* How to order */
+.pp-order-note { margin: 0 !important; max-width: none !important; color: var(--body-ink); font-size: 15px; }
+.pp-order-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.pp-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin: 0; padding: 0; list-style: none; counter-reset: none; }
+.pp-step { position: relative; padding: 28px 26px 26px; border: 1px solid #e6eaf0; border-top: 3px solid var(--brand-gold); border-radius: 5px; background: var(--paper); }
+.pp-step-number { display: grid; width: 54px; height: 54px; place-items: center; color: white; border-radius: 50%; background: var(--brand-red); box-shadow: inset 0 0 0 5px rgb(255 255 255 / 14%); font: 800 17px var(--font-heading); }
+.pp-step .step-kicker { margin-top: 20px; }
+.pp-step h3 { margin: 8px 0 10px; color: var(--heading-ink); font: 800 18px/1.3 var(--font-heading); letter-spacing: -.035em; }
+.pp-step p { margin: 0; color: #657184; font-size: 13px; line-height: 1.8; }
+
+/* Clients */
+.pp-clients { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; margin: 0; padding: 0; list-style: none; }
+.pp-client { display: grid; width: min(100%, 260px); height: 130px; place-items: center; padding: 22px; overflow: hidden; border: 1px solid #e6eaf0; border-radius: 5px; background: #fff; box-shadow: 0 10px 28px rgb(8 21 47 / 4%); color: #657184; font-size: 12px; font-weight: 700; text-align: center; }
+.pp-client img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+@media (max-width: 1050px) {
+  .pp-card--flagship .pp-media { min-height: 320px; }
+}
+@media (max-width: 800px) {
+  .pp-grid, .pp-size-grid, .pp-steps { grid-template-columns: 1fr; }
+  .pp-card--flagship { flex-direction: column; }
+  .pp-card--flagship .pp-media { flex: none; min-height: 0; aspect-ratio: 16 / 10; }
+  .pp-order-actions { margin-top: 6px; }
+}
+@media (max-width: 560px) {
+  .pp-jump { padding-inline: 22px; }
+  .pp-jump ol { grid-template-columns: 1fr; }
+  .pp-body { padding: 24px 22px 22px; }
+  .pp-size { padding-inline: 24px; }
+}

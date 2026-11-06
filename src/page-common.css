@@ -1,0 +1,14 @@
+/* Shared by all inner pages (About, Products, Contact): page hero, breadcrumb, quote-banner buttons */
+.page-hero { position: relative; isolation: isolate; overflow: hidden; color: white; background: linear-gradient(115deg, #08152f 0%, #092556 55%, #003a8f 100%); }
+.page-hero-grid { display: grid; grid-template-columns: 1.05fr .95fr; align-items: center; gap: clamp(36px, 6vw, 80px); padding-block: 72px 88px; }
+.breadcrumb { display: flex; align-items: center; gap: 9px; margin: 0 0 24px; color: #b9c6dc; font-size: 12px; font-weight: 700; }
+.breadcrumb a:hover { color: var(--brand-gold); }
+.breadcrumb [aria-current] { color: #ffdc56; }
+.page-hero h1 { margin: 0 0 20px; font: 800 clamp(2.5rem, 5vw, 4.3rem)/1.02 var(--font-heading); letter-spacing: -.07em; }
+.page-hero h1 em { color: var(--brand-gold); font-style: normal; }
+.page-hero-lead { max-width: 500px; margin: 0; color: #d5dff0; font-size: 15px; line-height: 1.8; }
+.quote-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+
+@media (max-width: 800px) {
+  .page-hero-grid { grid-template-columns: 1fr; padding-block: 52px 64px; }
+}

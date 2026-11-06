@@ -75,9 +75,12 @@ export function Contact() {
 
 export function Footer() {
   const quickLinks = [
-    ['Home', '#home'], ['About JPS', '#about'], ['Our products', '#products'], ['Our process', '#process'], ['Testimonials', '#testimonials'], ['Get a quote', '#contact'],
+    ['Home', '/'], ['About Us', '/about.html'], ['Our products', '/products.html'], ['Contact & quote', '/contact.html'],
   ]
-  const productLinks = products.slice(0, 6)
+  const productLinks = [
+    ['Solid Blocks 4" & 6"', '/products.html#solid-block'], ['Fairface Blocks', '/products.html#fairface-block'], ['Flavour Bricks', '/products.html#flavour-bricks'],
+    ['Paver Blocks', '/products.html#paver-block'], ['Blue Metal', '/products.html#blue-metal'], ['Highway Kerb Stone', '/products.html#kerb-stone'], ['Compound Wall Stone', '/products.html#compound-wall'],
+  ]
   return (
     <footer className="footer">
       <div className="container footer-main">
@@ -92,7 +95,7 @@ export function Footer() {
           </div>
         </div>
         <div className="footer-column"><h3>Quick links</h3>{quickLinks.map(([label, href]) => <a href={href} key={href}>{label}</a>)}</div>
-        <div className="footer-column"><h3>Our products</h3>{productLinks.map((product) => <a key={product.name} href="#products">{product.name}</a>)}</div>
+        <div className="footer-column"><h3>Our products</h3>{productLinks.map(([label, href]) => <a key={href} href={href}>{label}</a>)}</div>
         <div className="footer-column footer-reach"><h3>Reach us</h3><p>{brand.address}</p><a href={brand.phoneHref}>{brand.phone}</a><a href={brand.secondPhoneHref}>{brand.secondPhone}</a><p>Mon–Sat · 8:00 AM – 7:00 PM<br />Sunday · 9:00 AM – 1:00 PM</p></div>
       </div>
       <div className="container footer-bottom"><span>© 2026 JPS Bricks & Blocks, Peraiyur, Madurai. All rights reserved.</span><a href="#home">Back to top ↑</a></div>

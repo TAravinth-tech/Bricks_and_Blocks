@@ -3,18 +3,18 @@ import { ArrowUp, MapPin, Menu, Phone, Truck, X } from 'lucide-react'
 import { brand } from '../data/site-data'
 
 const logoUrl = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/JPS%20Bricks%20%26%20Blocks%20Badge-qoNdEkTOTu0HqZmPzLd5uBjR6bRm4L.png'
-const links = [
-  { label: 'Home', href: '#home' },
-  { label: 'About', href: '#about' },
-  { label: 'Products', href: '#products' },
-  { label: 'Process', href: '#process' },
-  { label: 'Testimonials', href: '#testimonials' },
-  { label: 'Contact', href: '#contact' },
+export type PageId = 'home' | 'about' | 'products' | 'contact'
+
+export const pageLinks: { id: PageId; label: string; href: string }[] = [
+  { id: 'home', label: 'Home', href: '/' },
+  { id: 'about', label: 'About Us', href: '/about.html' },
+  { id: 'products', label: 'Products', href: '/products.html' },
+  { id: 'contact', label: 'Contact', href: '/contact.html' },
 ]
 
 export function BrandLogo({ compact = false }: { compact?: boolean }) {
   return (
-    <a className={`brand-lockup${compact ? ' brand-lockup--compact' : ''}`} href="#home" aria-label="JPS Bricks & Blocks home">
+    <a className={`brand-lockup${compact ? ' brand-lockup--compact' : ''}`} href="/" aria-label="JPS Bricks & Blocks home">
       <img src={logoUrl} alt="JPS Bricks & Blocks badge logo" />
       {!compact && <span className="brand-name">JPS <span>Bricks & Blocks</span></span>}
     </a>
@@ -39,7 +39,7 @@ export function TopBar() {
   )
 }
 
-export function Navbar({ activeSection }: { activeSection: string }) {
+export function Navbar({ currentPage }: { currentPage: PageId }) {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
@@ -61,19 +61,19 @@ export function Navbar({ activeSection }: { activeSection: string }) {
           </button>
           <div id="primary-navigation" className={`nav-content${menuOpen ? ' nav-content--open' : ''}`}>
             <div className="nav-links">
-              {links.map((link) => (
+              {pageLinks.map((link) => (
                 <a
-                  key={link.href}
-                  className={`nav-link${activeSection === link.href.slice(1) ? ' nav-link--active' : ''}`}
+                  key={link.id}
+                  className={`nav-link${currentPage === link.id ? ' nav-link--active' : ''}`}
                   href={link.href}
-                  aria-current={activeSection === link.href.slice(1) ? 'location' : undefined}
+                  aria-current={currentPage === link.id ? 'page' : undefined}
                   onClick={() => setMenuOpen(false)}
                 >
                   {link.label}
                 </a>
               ))}
             </div>
-            <a className="button button--red nav-quote" href="#contact" onClick={() => setMenuOpen(false)}>
+            <a className="button button--red nav-quote" href="/contact.html" onClick={() => setMenuOpen(false)}>
               Get a quote <span aria-hidden="true">↗</span>
             </a>
           </div>
