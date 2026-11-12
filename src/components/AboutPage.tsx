@@ -54,7 +54,7 @@ export function AboutHero() {
         </div>
         <div className="page-hero-visual reveal">
           <div className="page-hero-photo">
-            <img src="/images/signboard-jps.png" alt="JPS Bricks and Blocks signboard with contact numbers 63827 27154 and 78715 99044" fetchPriority="high" />
+            <img src="/images/signboard-jps2.png" alt="JPS Bricks and Blocks signboard with contact numbers 63827 27154 and 78715 99044" fetchPriority="high" />
           </div>
           <div className="trust-badge"><strong>5<span>+</span></strong><small>Years of<br />trust</small></div>
         </div>
