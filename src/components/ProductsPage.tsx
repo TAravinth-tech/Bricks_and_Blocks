@@ -75,11 +75,16 @@ export function ProductRange() {
             const whatsappHref = `https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(`Hello JPS Bricks & Blocks, I would like to enquire about ${product.name}.`)}`
             return (
               <article className={`pp-card reveal${index === 0 ? ' pp-card--flagship' : ''}`} id={product.id} key={product.id} style={{ transitionDelay: `${(index % 2) * 70}ms` }}>
-                <div className="pp-media">
-                  <img src={product.image} alt={product.alt} loading={index < 2 ? 'eager' : 'lazy'} />
-                  <span className="pp-number">{String(index + 1).padStart(2, '0')}</span>
-                  <span className="pp-tag">{product.tag}</span>
-                </div>
+                <div className={`pp-media ${product.name === 'Kilometre Stone' ? 'pp-media--kilometre' : ''}`}>
+  <img
+    src={product.image}
+    alt={product.alt}
+    loading={index < 2 ? 'eager' : 'lazy'}
+  />
+  <span className="pp-number">{String(index + 1).padStart(2, '0')}</span>
+  <span className="pp-tag">{product.tag}</span>
+</div>
+
                 <div className="pp-body">
                   <h3>{product.name}</h3>
                   <span className="pp-tamil" lang="ta">{product.tamil}</span>

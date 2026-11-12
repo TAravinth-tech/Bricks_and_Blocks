@@ -96,10 +96,15 @@ export function FloatingButtons() {
   return (
     <div className="floating-actions" aria-label="Quick contact">
       {showTop && (
-        <a className="float-button float-button--top" href="#home" aria-label="Back to top">
-          <ArrowUp size={19} />
-        </a>
-      )}
+  <button
+    type="button"
+    className="float-button float-button--top"
+    aria-label="Back to top"
+    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+  >
+    <ArrowUp size={19} />
+  </button>
+)}
       <a className="float-button float-button--call" href={brand.phoneHref} aria-label={`Call ${brand.phone}`}>
         <Phone size={20} fill="currentColor" />
       </a>

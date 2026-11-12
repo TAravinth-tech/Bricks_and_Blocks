@@ -98,7 +98,16 @@ export function Footer() {
         <div className="footer-column"><h3>Our products</h3>{productLinks.map(([label, href]) => <a key={href} href={href}>{label}</a>)}</div>
         <div className="footer-column footer-reach"><h3>Reach us</h3><p>{brand.address}</p><a href={brand.phoneHref}>{brand.phone}</a><a href={brand.secondPhoneHref}>{brand.secondPhone}</a><p>Mon–Sat · 8:00 AM – 7:00 PM<br />Sunday · 9:00 AM – 1:00 PM</p></div>
       </div>
-      <div className="container footer-bottom"><span>© 2026 JPS Bricks & Blocks, Peraiyur, Madurai. All rights reserved.</span><a href="#home">Back to top ↑</a></div>
+      <div className="container footer-bottom">
+  <span>© 2026 JPS Bricks & Blocks, Peraiyur, Madurai. All rights reserved.</span>
+  <button
+    type="button"
+    className="back-to-top"
+    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+  >
+    Back to top ↑
+  </button>
+</div>
     </footer>
   )
 }
