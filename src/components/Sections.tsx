@@ -466,11 +466,11 @@ function ThreeBackdrop() {
 
     /* ---------- pointer parallax ---------- */
     const pointer = { x: 0, y: 0 };
-    const onPointer = (e: PointerEvent) => {
-      const r = section.getBoundingClientRect();
-      pointer.x = ((e.clientX - r.left) / r.width) * 2 - 1;
-      pointer.y = ((e.clientY - r.top) / r.height) * 2 - 1;
-    };
+    const onPointer = (e: globalThis.PointerEvent) => {
+  const r = section.getBoundingClientRect();
+  pointer.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+  pointer.y = ((e.clientY - r.top) / r.height) * 2 - 1;
+};
     section.addEventListener("pointermove", onPointer);
 
     /* ---------- size ---------- */
@@ -2189,13 +2189,13 @@ export function StatsBand() {
 
     /* ---------- pointer ---------- */
     const pointer = { x: 0, y: 0, cx: -9999, cy: -9999 };
-    const onPointer = (e: PointerEvent) => {
-      const r = section.getBoundingClientRect();
-      pointer.x = ((e.clientX - r.left) / r.width) * 2 - 1;
-      pointer.y = ((e.clientY - r.top) / r.height) * 2 - 1;
-      pointer.cx = e.clientX;
-      pointer.cy = e.clientY;
-    };
+    const onPointer = (e: globalThis.PointerEvent) => {
+  const r = section.getBoundingClientRect();
+  pointer.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+  pointer.y = ((e.clientY - r.top) / r.height) * 2 - 1;
+  pointer.cx = e.clientX;
+  pointer.cy = e.clientY;
+};
     const onLeave = () => {
       pointer.cx = pointer.cy = -9999;
     };
