@@ -3,6 +3,116 @@ import { ArrowRight, Clock3, MapPin, Phone, Send } from "lucide-react";
 import { brand, products } from "../data/site-data";
 import { BrandLogo } from "./SiteChrome";
 
+/* ------------------------------------------------------------------ */
+/*  STYLES (embedded so the glow border lives in this one file)        */
+/* ------------------------------------------------------------------ */
+const formGlowCss = `
+@property --ring-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.contact-section .enquiry-form {
+  position: relative;
+  overflow: visible;                         /* the ring sits outside the box */
+  border: 2px solid rgb(0 58 143 / 60%);     /* always-visible base border */
+  border-radius: 20px;
+  background: #fff;
+  box-shadow:
+    0 0 0 4px rgb(255 196 0 / 22%),
+    0 0 26px 2px rgb(0 58 143 / 30%),
+    0 24px 50px -24px rgb(8 21 47 / 40%);
+  animation: form-glow 3.2s ease-in-out infinite alternate;
+  transition: border-color .3s;
+}
+
+/* rotating colour ring */
+.contact-section .enquiry-form::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  padding: 4px;                              /* ring thickness */
+  border-radius: inherit;
+  background: conic-gradient(from var(--ring-angle), #ffc400, #003a8f, #e11d2a, #ffc400);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: ring-spin 4s linear infinite;
+}
+
+/* stronger glow while the person is typing */
+.contact-section .enquiry-form:focus-within {
+  border-color: #ffc400;
+  animation-duration: 1.6s;
+}
+
+/* ---------- input fields: clearly visible borders ---------- */
+.contact-section .enquiry-form .field input,
+.contact-section .enquiry-form .field select,
+.contact-section .enquiry-form .field textarea {
+  border: 2px solid rgb(0 58 143 / 55%);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 0 0 0 rgb(255 196 0 / 0%), 0 2px 8px -3px rgb(0 58 143 / 28%);
+  outline: none;
+  transition: border-color .25s, box-shadow .25s, background-color .25s;
+}
+.contact-section .enquiry-form .field input::placeholder,
+.contact-section .enquiry-form .field textarea::placeholder {
+  color: #7a8599;
+}
+
+/* hover: border turns brand blue */
+.contact-section .enquiry-form .field input:hover,
+.contact-section .enquiry-form .field select:hover,
+.contact-section .enquiry-form .field textarea:hover {
+  border-color: #003a8f;
+  box-shadow: 0 0 0 3px rgb(0 58 143 / 12%), 0 4px 12px -4px rgb(0 58 143 / 35%);
+}
+
+/* focus: bright gold border with a glow */
+.contact-section .enquiry-form .field input:focus,
+.contact-section .enquiry-form .field select:focus,
+.contact-section .enquiry-form .field textarea:focus {
+  border-color: #ffc400;
+  background: #fffdf4;
+  box-shadow: 0 0 0 4px rgb(255 196 0 / 35%), 0 0 18px 2px rgb(0 58 143 / 30%);
+}
+
+/* wrong value: red border once the person has typed something */
+.contact-section .enquiry-form .field input:not(:placeholder-shown):invalid,
+.contact-section .enquiry-form .field textarea:not(:placeholder-shown):invalid {
+  border-color: #e11d2a;
+  box-shadow: 0 0 0 3px rgb(225 29 42 / 18%);
+}
+
+@keyframes ring-spin {
+  to { --ring-angle: 360deg; }
+}
+
+@keyframes form-glow {
+  from {
+    box-shadow:
+      0 0 0 4px rgb(255 196 0 / 18%),
+      0 0 22px 2px rgb(0 58 143 / 25%),
+      0 24px 50px -24px rgb(8 21 47 / 40%);
+  }
+  to {
+    box-shadow:
+      0 0 0 6px rgb(255 196 0 / 32%),
+      0 0 46px 8px rgb(0 58 143 / 45%),
+      0 24px 50px -24px rgb(8 21 47 / 40%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-section .enquiry-form,
+  .contact-section .enquiry-form::before { animation: none; }
+}
+`;
+
 export function Contact() {
   const [submitted, setSubmitted] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
@@ -36,6 +146,8 @@ export function Contact() {
 
   return (
     <>
+      <style>{formGlowCss}</style>
+
       <div className="quote-banner">
         <div className="container quote-banner-inner reveal">
           <div>
