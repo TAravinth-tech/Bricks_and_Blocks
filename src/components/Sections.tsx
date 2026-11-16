@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowRight, ArrowUpRight, Check, Quote, Star } from 'lucide-react'
+import { ArrowRight, ArrowUpRight, Check, Quote, RotateCcw, Star } from 'lucide-react'
 import { brand, features, marqueeProducts, processSteps, stats, testimonials } from '../data/site-data'
 
 
@@ -10,10 +10,14 @@ import * as THREE from "three";
    Three.js backdrop
    - dim brick wall that assembles itself (background)
    - paver floor with a travelling ripple
-   - a HOUSE on the right, built piece by piece:
+   - a HOUSE built piece by piece:
        concrete-block plinth -> brick walls (running bond, door,
        windows) -> gable ends -> red roof tiles -> chimney -> smoke
-   - camera + scene react to the mouse
+   - DESKTOP: house sits on the right, camera + scene follow the mouse
+   - MOBILE (<= 800px): the 3D scene gets its OWN stage above the text,
+       house centred and bigger, no dark overlay, slow auto-orbit,
+       drag to turn it, golden ground ripple + rising sparks when it is
+       finished, and a "Rebuild" button to watch it go up again.
 
    SPEED TUNING (all in one place):
    - SPEED      : global speed dial (1 = old speed, 1.6 = faster)
@@ -33,13 +37,16 @@ const easeOutBack = (t: number) => {
 };
 const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1);
 const rnd = (a = 0, b = 1) => a + Math.random() * (b - a);
+const isCompact = () => window.matchMedia("(max-width: 800px)").matches;
 
 function ThreeBackdrop() {
   const mountRef = useRef<HTMLDivElement>(null);
+  const replayRef = useRef<() => void>(() => {});
+  const [dragged, setDragged] = useState(false);
 
   useEffect(() => {
     const mount = mountRef.current;
-    const section = mount?.parentElement;
+    const section = mount?.closest("section") as HTMLElement | null;
     if (!mount || !section) return;
 
     let renderer: THREE.WebGLRenderer;
@@ -49,14 +56,15 @@ function ThreeBackdrop() {
       return; // no WebGL: the CSS background still looks fine
     }
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    let compact = isCompact();
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, compact ? 1.75 : 2));
     mount.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
     scene.fog = new THREE.Fog(0x08152f, 12, 32);
     const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
-    let baseZ = 11;
-    camera.position.set(0, 0.5, baseZ);
+    let baseZ = compact ? 9.6 : 11;
+    camera.position.set(0, 0.5, compact ? 13 : baseZ); // mobile: slow push-in on load
 
     /* ---------- lights ---------- */
     scene.add(new THREE.AmbientLight(0x8fb0ff, 0.95));
@@ -133,7 +141,7 @@ function ThreeBackdrop() {
     });
     if (floor.instanceColor) floor.instanceColor.needsUpdate = true;
 
-    /* ---------- floating blocks (kept to the right half) ---------- */
+    /* ---------- floating blocks (right half on desktop, pulled in on mobile) ---------- */
     const floatGeo = new THREE.BoxGeometry(1.2, 0.55, 0.65);
     disposables.push(floatGeo);
     const floatSpecs: [number, number, number, number, number][] = [
@@ -153,7 +161,7 @@ function ThreeBackdrop() {
       const mesh = new THREE.Mesh(floatGeo, mat);
       mesh.position.set(x, y, z);
       rig.add(mesh);
-      return { mesh, y, phase };
+      return { mesh, x, y, phase };
     });
 
     /* =====================================================
@@ -397,6 +405,43 @@ function ThreeBackdrop() {
       return { mesh, mat };
     });
 
+    /* ---- mobile extras: golden ground ripple + rising sparks ---- */
+    const ringGeo = new THREE.RingGeometry(3.0, 3.14, 96);
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: 0xffc400,
+      transparent: true,
+      opacity: 0,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+    });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.y = 0.04;
+    house.add(ring);
+
+    const SPARKS = 70;
+    const sparkPos = new Float32Array(SPARKS * 3);
+    const sparkGeo = new THREE.BufferGeometry();
+    sparkGeo.setAttribute("position", new THREE.BufferAttribute(sparkPos, 3));
+    const sparkMat = new THREE.PointsMaterial({
+      color: 0xffd35a,
+      size: 0.16,
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    });
+    const sparkPts = new THREE.Points(sparkGeo, sparkMat);
+    sparkPts.frustumCulled = false;
+    house.add(sparkPts);
+    const sparkSeed = Array.from({ length: SPARKS }, () => ({
+      a: rnd(0, Math.PI * 2),
+      r: rnd(2.6, 4.2),
+      p: Math.random(),
+      s: rnd(0.6, 1.2),
+    }));
+    disposables.push(ringGeo, ringMat, sparkGeo, sparkMat);
+
     /* ---------- animation ---------- */
     const dummy = new THREE.Object3D();
     const hd = new THREE.Object3D();
@@ -462,16 +507,63 @@ function ThreeBackdrop() {
         s.mesh.scale.setScalar(0.6 + p * 1.7);
         s.mat.opacity = Math.sin(p * Math.PI) * 0.32;
       });
+
+      // mobile only: ground ripple while it builds, sparks once it is finished
+      const rp = (time * 0.45) % 1;
+      ringMat.opacity = compact ? (1 - rp) * 0.5 * clamp01((time - 0.5) / 0.8) : 0;
+      ring.scale.setScalar(0.75 + rp * 0.85);
+      const sparkOn = compact && done;
+      sparkMat.opacity = sparkOn ? 0.95 : 0;
+      if (sparkOn) {
+        sparkSeed.forEach((s, i) => {
+          const p = (time * 0.16 * s.s + s.p) % 1;
+          const a = s.a + time * 0.25;
+          const rad = s.r * (1 - p * 0.3);
+          sparkPos[i * 3] = Math.cos(a) * rad;
+          sparkPos[i * 3 + 1] = 0.3 + p * 6.5;
+          sparkPos[i * 3 + 2] = Math.sin(a) * rad;
+        });
+        sparkGeo.attributes.position.needsUpdate = true;
+      }
     };
 
-    /* ---------- pointer parallax ---------- */
+    /* ---------- pointer parallax (desktop) ---------- */
     const pointer = { x: 0, y: 0 };
     const onPointer = (e: globalThis.PointerEvent) => {
-  const r = section.getBoundingClientRect();
-  pointer.x = ((e.clientX - r.left) / r.width) * 2 - 1;
-  pointer.y = ((e.clientY - r.top) / r.height) * 2 - 1;
-};
+      const r = section.getBoundingClientRect();
+      pointer.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+      pointer.y = ((e.clientY - r.top) / r.height) * 2 - 1;
+    };
     section.addEventListener("pointermove", onPointer);
+
+    /* ---------- drag to turn the house (mobile + anywhere the canvas is reachable) ---------- */
+    let dragging = false;
+    let dragYaw = 0;
+    let lastX = 0;
+    let dragReported = false;
+    mount.style.touchAction = "pan-y"; // vertical swipes still scroll the page
+    const onDown = (e: globalThis.PointerEvent) => {
+      dragging = true;
+      lastX = e.clientX;
+      mount.setPointerCapture?.(e.pointerId);
+    };
+    const onDrag = (e: globalThis.PointerEvent) => {
+      if (!dragging) return;
+      const dx = e.clientX - lastX;
+      lastX = e.clientX;
+      dragYaw += dx * 0.012;
+      if (!dragReported && Math.abs(dx) > 1) {
+        dragReported = true;
+        setDragged(true);
+      }
+    };
+    const onUp = () => {
+      dragging = false;
+    };
+    mount.addEventListener("pointerdown", onDown);
+    mount.addEventListener("pointermove", onDrag);
+    mount.addEventListener("pointerup", onUp);
+    mount.addEventListener("pointercancel", onUp);
 
     /* ---------- size ---------- */
     const lookAt = new THREE.Vector3(0, 0.4, -3);
@@ -482,13 +574,27 @@ function ThreeBackdrop() {
     const resize = () => {
       const w = mount.clientWidth || 1;
       const h = mount.clientHeight || 1;
+      compact = isCompact();
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, compact ? 1.75 : 2));
       renderer.setSize(w, h);
       camera.aspect = w / h;
-      baseZ = camera.aspect < 1 ? 16 : camera.aspect < 1.4 ? 13 : 11;
-      // on narrow screens the house moves in and gets smaller
-      const narrow = camera.aspect < 1.2;
-      house.position.set(narrow ? 1.6 : 4.9, -3.38, -1.2);
-      house.scale.setScalar(narrow ? 0.8 : 1.15);
+      if (compact) {
+        // mobile: house centred in its own stage, framed so the roof, chimney and smoke all fit
+        baseZ = 9.6;
+        house.position.set(0, -3.38, 0.4);
+        house.scale.setScalar(0.95);
+        lookAt.set(0, -0.2, 0);
+      } else {
+        baseZ = camera.aspect < 1 ? 16 : camera.aspect < 1.4 ? 13 : 11;
+        // on narrow screens the house moves in and gets smaller
+        const narrow = camera.aspect < 1.2;
+        house.position.set(narrow ? 1.6 : 4.9, -3.38, -1.2);
+        house.scale.setScalar(narrow ? 0.8 : 1.15);
+        lookAt.set(0, 0.4, -3);
+      }
+      floaters.forEach((f) => {
+        f.mesh.position.x = compact ? f.x * 0.5 : f.x;
+      });
       camera.updateProjectionMatrix();
       if (reduceMotion) {
         camera.position.z = baseZ;
@@ -500,18 +606,34 @@ function ThreeBackdrop() {
     resize();
 
     let raf = 0;
+    let startAt = 0; // moves forward when "Rebuild" is pressed
     const clock = new THREE.Clock();
+    replayRef.current = () => {
+      startAt = clock.getElapsedTime();
+    };
     const frame = () => {
       raf = requestAnimationFrame(frame);
+      const now = clock.getElapsedTime();
       // one speed dial for the whole scene
-      let t = clock.getElapsedTime() * SPEED;
+      let t = (now - startAt) * SPEED;
       if (LOOP > 0) t %= LOOP;
       update(t);
-      // camera follows the mouse a little quicker too
-      camera.position.x += (pointer.x * 0.9 - camera.position.x) * 0.06;
-      camera.position.y += (0.5 - pointer.y * 0.5 - camera.position.y) * 0.06;
+
+      // mobile has no mouse: the camera drifts on its own instead
+      const px = compact ? Math.sin(now * 0.25) * 0.35 : pointer.x;
+      const py = compact ? 0 : pointer.y;
+      camera.position.x += (px * 0.9 - camera.position.x) * 0.06;
+      camera.position.y += ((compact ? 1.0 : 0.5) - py * 0.5 - camera.position.y) * 0.06;
       camera.position.z += (baseZ - camera.position.z) * 0.06;
-      rig.rotation.y += (pointer.x * 0.08 - rig.rotation.y) * 0.06;
+      rig.rotation.y += (px * 0.08 - rig.rotation.y) * 0.06;
+
+      if (compact) {
+        if (!dragging) dragYaw *= 0.988; // the house slowly returns after you let go
+        const targetYaw = 0.5 + Math.sin(now * 0.35) * 0.3 + dragYaw;
+        house.rotation.y += (targetYaw - house.rotation.y) * (dragging ? 0.25 : 0.08);
+      } else {
+        house.rotation.y += (0.5 - house.rotation.y) * 0.08;
+      }
       render();
     };
 
@@ -534,13 +656,30 @@ function ThreeBackdrop() {
       io?.disconnect();
       ro.disconnect();
       section.removeEventListener("pointermove", onPointer);
+      mount.removeEventListener("pointerdown", onDown);
+      mount.removeEventListener("pointermove", onDrag);
+      mount.removeEventListener("pointerup", onUp);
+      mount.removeEventListener("pointercancel", onUp);
+      replayRef.current = () => {};
       disposables.forEach((d) => d.dispose());
       renderer.dispose();
       renderer.domElement.remove();
     };
   }, []);
 
-  return <div className="h3-canvas" ref={mountRef} aria-hidden="true" />;
+  return (
+    <div className="h3-stage">
+      <div className="h3-canvas" ref={mountRef} aria-hidden="true" />
+      <div className="h3-tools">
+        <span className={`h3-hint${dragged ? " is-gone" : ""}`} aria-hidden="true">
+          ↔ Drag to turn the house
+        </span>
+        <button type="button" className="h3-replay" onClick={() => replayRef.current()}>
+          <RotateCcw size={14} /> Rebuild
+        </button>
+      </div>
+    </div>
+  );
 }
 
 /* Counts up once the hero mounts (faster: starts sooner, finishes sooner) */
@@ -591,6 +730,12 @@ const heroCss = `
   color: #fff;
   background: radial-gradient(ellipse at 70% 40%, #0b2d66 0%, #08152f 72%);
 }
+/* the 3D stage: full-bleed behind the text on desktop, its own block on mobile */
+.h3-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
 .h3-canvas {
   position: absolute;
   inset: 0;
@@ -601,6 +746,7 @@ const heroCss = `
   width: 100%;
   height: 100%;
 }
+.h3-tools { display: none; }
 /* darker on the left (text side), clear on the right (house side) */
 .h3-vignette {
   position: absolute;
@@ -902,17 +1048,83 @@ const heroCss = `
   0% { opacity: 1; transform: translateY(0); }
   100% { opacity: 0; transform: translateY(10px); }
 }
+@keyframes h3-nudge {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(6px); }
+}
 
 /* ---------- responsive ---------- */
 @media (max-width: 1100px) {
   .h3-stamp { display: none; }
 }
+
+/* MOBILE: the 3D house gets its own clear stage above the text */
 @media (max-width: 800px) {
-  .h3-vignette {
-    background: linear-gradient(0deg, rgb(8 21 47 / 78%), rgb(8 21 47 / 70%));
+  .h3 { min-height: 0; }
+  .h3-stage {
+    position: relative;
+    inset: auto;
+    z-index: auto;           /* lets the tools sit above the vignette */
+    width: 100%;
+    height: clamp(340px, 94vw, 480px);
   }
+  .h3-canvas { cursor: grab; touch-action: pan-y; }
+  .h3-canvas:active { cursor: grabbing; }
+
+  /* no heavy dark overlay: only a soft fade at the top and a blend into the page at the bottom */
+  .h3-vignette {
+    inset: 0 0 auto 0;
+    height: clamp(340px, 94vw, 480px);
+    background: linear-gradient(180deg, rgb(8 21 47 / 55%) 0, transparent 20%, transparent 60%, #08152f 100%);
+  }
+
+  .h3-tools {
+    position: absolute;
+    z-index: 3;
+    top: 12px;
+    left: 14px;
+    right: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    pointer-events: none;
+  }
+  .h3-hint {
+    padding: 7px 12px;
+    color: #fff4bf;
+    border: 1px solid rgb(255 196 0 / 32%);
+    border-radius: 999px;
+    background: rgb(8 21 47 / 55%);
+    backdrop-filter: blur(6px);
+    font-size: 11.5px;
+    font-weight: 700;
+    animation: h3-nudge 2.2s ease-in-out infinite;
+    transition: opacity 0.4s ease;
+  }
+  .h3-hint.is-gone { opacity: 0; animation: none; }
+  .h3-replay {
+    display: inline-flex;
+    min-height: 34px;
+    align-items: center;
+    gap: 6px;
+    padding: 0 14px;
+    color: #fff;
+    border: 1px solid rgb(255 255 255 / 35%);
+    border-radius: 999px;
+    background: rgb(8 21 47 / 55%);
+    backdrop-filter: blur(8px);
+    font-size: 12px;
+    font-weight: 800;
+    pointer-events: auto;
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.2s ease;
+  }
+  .h3-replay:active { transform: scale(0.94); border-color: var(--brand-gold); }
+
   .h3-scroll { display: none; }
-  .h3-inner { padding: 70px 0 70px; }
+  /* the headline starts over the faded bottom of the stage, so the two blend together */
+  .h3-inner { min-height: 0; margin-top: -34px; padding: 0 0 64px; }
 }
 @media (max-width: 560px) {
   .h3 h1 { font-size: clamp(2.9rem, 13vw, 4.4rem); }
@@ -930,6 +1142,8 @@ const heroCss = `
     transform: none !important;
   }
   .h3-underline { transform: scaleX(1); }
+  .h3-hint { animation: none; }
+  .h3-replay { display: none; }
 }
 `;
 
@@ -1011,7 +1225,6 @@ export function Hero() {
     </section>
   );
 }
-
 
 
 
