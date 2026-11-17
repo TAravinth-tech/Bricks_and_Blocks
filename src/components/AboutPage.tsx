@@ -1,4 +1,5 @@
-import { Check, Droplets, Factory, HeartHandshake, IndianRupee, MapPin, Ruler, ShieldCheck, Truck } from 'lucide-react'
+import { Fragment, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent } from "react";
+import { Check, Droplets, Factory, HeartHandshake, IndianRupee, MapPin, Ruler, ShieldCheck, Truck } from "lucide-react";
 
 /* ---------- Content ---------- */
 
@@ -38,51 +39,8 @@ const locations = [
   { name: 'Virudhunagar', note: 'Bulk orders' },
 ]
 
-/* ---------- Sections ---------- */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import { Fragment, useEffect, useRef, type CSSProperties } from "react";
-
 /* =========================================================
    AboutHero — "poured, measured, hung"
-
-   1. HEADLINE  Every letter starts as a faint empty mould, then
-                concrete is POURED into it from the bottom up,
-                letter by letter, left to right.
-   2. TAPE      A yellow measuring tape is pulled out under the
-                headline. Each year mark pops as the hook passes
-                it, and the 5 turns red.
-   3. LEAD      A gold highlighter swipes under the key phrase.
-   4. SIGN      The signboard is LOWERED on two ropes from a beam,
-                then swings like a real pendulum and settles.
-                Tap or click the sign to swing it again.
-   5. BADGE     Hangs from the sign like a tag, swings a little
-                behind it, and its number rolls up to 5 like an
-                odometer.
-
-   Safe by design
-   - The normal state of every element is the FINISHED state.
-     The animations only play "from" a hidden state, so if CSS
-     animations are off nothing stays invisible.
-   - prefers-reduced-motion: all animation is switched off.
    ========================================================= */
 
 const countLetters = (t: string) => t.replace(/ /g, "").length;
@@ -507,50 +465,8 @@ const ahCss = `
 }
 `;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* =========================================================
    WhoWeAre — "yard to house"
-
-   Keeps your original markup and class names. The panel gets a
-   small looping scene on top:
-
-     our yard (chimney smoking)  ───►  the customer's house
-
-   1. The truck waits at the yard, then drives to the house.
-   2. At the house the window lights up and a "Delivered" tag
-      pops over the roof.
-   3. The truck turns around and drives back. Repeat.
-
-   The wheels really turn, only while the truck is moving.
-   No bricks, no blocks, one idea.
-
-   Safe by design
-   - The normal state is the FINISHED state: truck at the house,
-     window lit, tag visible. Animation is armed by JS.
-   - The loop only runs while the section is on screen.
-   - prefers-reduced-motion: nothing is armed, nothing moves.
    ========================================================= */
 
 export function WhoWeAre() {
@@ -817,70 +733,16 @@ const css = `
 }
 `;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import {  type PointerEvent } from "react";
-
-
 /* =========================================================
    FivePromises — "the inspection line"
-
-   Your copy says these are the five checks a block has to pass
-   before it leaves the yard, so the section IS that line.
-
-   - As you scroll, a gold scanner travels down the line.
-   - Each time it reaches a checkpoint: the card wakes up, the
-     icon draws itself, a red PASSED stamp slams down with a
-     little burst, and the card gives a tiny shake.
-   - Scroll back up and the checks un-stamp; scroll down and
-     they are checked again.
-   - Hover a card: a gold spotlight follows the cursor and the
-     card tilts toward you.
-
-   Uses your existing `promises` array:
-     { icon, title, description, tamil }  (lucide icon component)
-
-   Safe by design
-   - The normal state is the FINISHED state: line full, every
-     card passed and stamped. JS "arms" the scroll effect.
-   - prefers-reduced-motion: nothing is armed, nothing moves.
    ========================================================= */
 
 const clamp = (n: number, a: number, b: number) => Math.min(b, Math.max(a, n));
 
 export function FivePromises() {
   const rootRef = useRef<HTMLElement>(null);
-  const listRef = useRef<HTMLDivElement>(null)
+  // FIX: this ref is attached to a <div className="fp-list">, so it is typed as HTMLDivElement
+  const listRef = useRef<HTMLDivElement>(null);
 
   // scroll-linked scanner: fills the line and checks the cards it passes
   useEffect(() => {
@@ -955,46 +817,46 @@ export function FivePromises() {
           <div className="fp-head" aria-hidden="true" />
 
           <ol className="fp-cards" role="list">
-          {promises.map(({ icon: Icon, title, description, tamil }, index) => (
-            <li
-              className="fp-card"
-              key={title}
-              onPointerMove={onMove}
-              onPointerLeave={onLeave}
-              style={{ ["--k" as string]: index } as CSSProperties}
-            >
-              <i className="fp-strip" aria-hidden="true" />
-              <span className="fp-node" aria-hidden="true">
-                0{index + 1}
-              </span>
-              <span className="fp-ghost" aria-hidden="true">
-                0{index + 1}
-              </span>
-
-              <div className="fp-top">
-                <div className="fp-icon">
-                  <Icon size={24} strokeWidth={1.8} aria-hidden="true" />
-                </div>
-                <span className="fp-stampwrap" aria-hidden="true">
-                  <span className="fp-burst">
-                    {Array.from({ length: 8 }, (_, i) => (
-                      <i key={i} style={{ ["--a" as string]: `${i * 45}deg` } as CSSProperties} />
-                    ))}
-                  </span>
-                  <span className="fp-stamp">
-                    <Check size={16} strokeWidth={3.4} />
-                    Passed
-                  </span>
+            {promises.map(({ icon: Icon, title, description, tamil }, index) => (
+              <li
+                className="fp-card"
+                key={title}
+                onPointerMove={onMove}
+                onPointerLeave={onLeave}
+                style={{ ["--k" as string]: index } as CSSProperties}
+              >
+                <i className="fp-strip" aria-hidden="true" />
+                <span className="fp-node" aria-hidden="true">
+                  0{index + 1}
                 </span>
-              </div>
+                <span className="fp-ghost" aria-hidden="true">
+                  0{index + 1}
+                </span>
 
-              <h3>{title}</h3>
-              <p>{description}</p>
-              <span className="fp-tamil" lang="ta">
-                {tamil}
-              </span>
-            </li>
-          ))}
+                <div className="fp-top">
+                  <div className="fp-icon">
+                    <Icon size={24} strokeWidth={1.8} aria-hidden="true" />
+                  </div>
+                  <span className="fp-stampwrap" aria-hidden="true">
+                    <span className="fp-burst">
+                      {Array.from({ length: 8 }, (_, i) => (
+                        <i key={i} style={{ ["--a" as string]: `${i * 45}deg` } as CSSProperties} />
+                      ))}
+                    </span>
+                    <span className="fp-stamp">
+                      <Check size={16} strokeWidth={3.4} />
+                      Passed
+                    </span>
+                  </span>
+                </div>
+
+                <h3>{title}</h3>
+                <p>{description}</p>
+                <span className="fp-tamil" lang="ta">
+                  {tamil}
+                </span>
+              </li>
+            ))}
           </ol>
         </div>
       </div>
@@ -1242,52 +1104,8 @@ const css1 = `
 }
 `;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import {  useMemo,  useState } from "react";
-
 /* =========================================================
    Journey — "from one yard to the whole district"
-
-   A small coverage map sits beside the timeline (and stays in
-   view on desktop). It starts as a single dot: the yard.
-
-   Every time you scroll to a new chapter:
-   - a new ring ripples out from the yard (the area it supplies)
-   - more sites light up inside that ring
-   - the "450+ sites" and "11 product lines" counters climb
-   - the map caption switches to that chapter's year and title
-   - the timeline dot fills gold like a pour, and the chapter
-     text comes into focus (it starts soft and faded)
-
-   Scroll back up and the map shrinks again.
-
-   Uses your existing `journey` array: { year, title, text }
-
-   Safe by design
-   - The normal state is the FINISHED state: every ring, every
-     site, full counters, all chapters sharp.
-   - prefers-reduced-motion: nothing is armed, nothing moves.
    ========================================================= */
 
 const JR_SITES = 450;
@@ -1323,7 +1141,8 @@ function useJourneyTween(target: number, on: boolean) {
 
 export function Journey() {
   const rootRef = useRef<HTMLElement>(null);
-  const listRef = useRef<HTMLDivElement>(null);
+  // FIX: this ref is attached to an <ol className="jr-timeline">, so it is typed as HTMLOListElement
+  const listRef = useRef<HTMLOListElement>(null);
   const n = journey.length;
   const [armed, setArmed] = useState(false);
   const [step, setStep] = useState(n); // how many chapters have been reached
@@ -1575,31 +1394,8 @@ const journeyCss = `
 .jr:not(.is-armed) .jr-wave { display: none; }
 `;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* =========================================================
-   Commitment — redesign: "the blueprint board + the foundation"
-   TOP (light)
-   - a plumb bob swings in and settles dead straight
-   - centred heading rises word by word, a spirit level wobbles
-     level, then the blueprint board UNROLLS downward
-   - the three photos are pinned / taped onto the board and
-     swing from their pins until they hang still
-   - dimension line draws, a "ONE STANDARD" seal stamps on
-   BASE (dark navy foundation)
-   - the promises drop in as solid blocks, stacked like steps,
-     each one stamped with a check and a gold mortar line
+   Commitment — "the blueprint board + the foundation"
    ========================================================= */
 
 /* true once the element has scrolled into view */
@@ -2390,16 +2186,9 @@ export function Commitment() {
   );
 }
 
-
-
-
-
-
-
-
-
-
-
+/* =========================================================
+   Delivery
+   ========================================================= */
 
 export function Delivery() {
   return (
@@ -2422,3 +2211,22 @@ export function Delivery() {
     </section>
   )
 }
+
+/* =========================================================
+   Page
+   ========================================================= */
+
+export function AboutPage() {
+  return (
+    <>
+      <AboutHero />
+      <WhoWeAre />
+      <FivePromises />
+      <Journey />
+      <Commitment />
+      <Delivery />
+    </>
+  );
+}
+
+export default AboutPage;
