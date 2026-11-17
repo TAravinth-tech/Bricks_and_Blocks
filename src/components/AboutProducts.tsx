@@ -9,6 +9,14 @@ import { useEffect, useRef, type CSSProperties } from 'react'
    SAME placement, classes and looks as before.
    Only the animations are new.
 
+   >>> SPEED DIAL <<<
+   AB_SPEED below speeds up EVERYTHING in this section at once:
+   every delay and every duration, in the JS and in the CSS.
+     1    = original speed
+     1.8  = fast (current)
+     2.5  = very fast
+   Bigger number = faster.
+
    GALLERY
    - Each photo is covered by a brick wall (running bond). When the
      gallery scrolls in, the bricks FLIP like shutters in a ripple
@@ -45,7 +53,19 @@ import { useEffect, useRef, type CSSProperties } from 'react'
    - Respects prefers-reduced-motion (final state, no movement).
    ========================================================= */
 
-const dly = (ms: number) => ({ ['--d' as string]: `${ms}ms` }) as CSSProperties
+const AB_SPEED = 5.5
+
+/* a time in ms, sped up by the dial */
+const ms = (n: number) => Math.round(n / AB_SPEED)
+
+/* rewrites every "0.8s" / "300ms" in the CSS below, so the stylesheet follows the same dial */
+const speedUp = (css: string) =>
+  css.replace(/([\s(,+])(\d*\.?\d+)(ms|s)(?![\w-])/g, (_m, pre: string, num: string, unit: string) => {
+    const base = parseFloat(num) * (unit === 's' ? 1000 : 1)
+    return `${pre}${Math.round(base / AB_SPEED)}ms`
+  })
+
+const dly = (t: number) => ({ ['--d' as string]: `${ms(t)}ms` }) as CSSProperties
 
 /* ---------- brick wall that covers a photo and then flips away ---------- */
 function AbWall({ cols, rows, seed, base = 0 }: { cols: number; rows: number; seed: number; base?: number }) {
@@ -67,7 +87,7 @@ function AbWall({ cols, rows, seed, base = 0 }: { cols: number; rows: number; se
               <i
                 key={c}
                 className={`ab-cell t${tone}`}
-                style={{ ['--d' as string]: `${Math.round(base + dist * 110 + rand(k) * 90)}ms` } as CSSProperties}
+                style={{ ['--d' as string]: `${ms(base + dist * 110 + rand(k) * 90)}ms` } as CSSProperties}
               />
             )
           })}
@@ -154,9 +174,10 @@ export function About() {
 
     const runCount = () => {
       if (!countEl) return
-      const t0 = performance.now() + 1600 // after the stamp has landed
+      const t0 = performance.now() + ms(1600) // after the stamp has landed
+      const dur = ms(1000)
       const tick = (now: number) => {
-        const t = Math.min(Math.max((now - t0) / 1000, 0), 1)
+        const t = Math.min(Math.max((now - t0) / dur, 0), 1)
         countEl.textContent = String(Math.round(5 * (1 - Math.pow(1 - t, 3))))
         if (t < 1) cRaf = requestAnimationFrame(tick)
         else gallery.classList.add('is-done')
@@ -194,7 +215,7 @@ export function About() {
 
     check()
     // lazy images can move things after load, so check a few more times
-    ;[150, 600, 1500].forEach((ms) => timers.push(window.setTimeout(check, ms)))
+    ;[150, 600, 1500].forEach((t) => timers.push(window.setTimeout(check, t)))
     window.addEventListener('scroll', check, { passive: true })
     window.addEventListener('resize', check)
 
@@ -266,7 +287,7 @@ export function About() {
               <i
                 className={`ab-brick ${tone}`}
                 key={i}
-                style={{ left: x, bottom: y, ['--d' as string]: `${d}ms`, ['--side' as string]: i % 2 ? 1 : -1 } as CSSProperties}
+                style={{ left: x, bottom: y, ['--d' as string]: `${ms(d)}ms`, ['--side' as string]: i % 2 ? 1 : -1 } as CSSProperties}
               />
             ))}
           </div>
@@ -299,7 +320,7 @@ export function About() {
           </p>
           <ul className="promise-list">
             {promises.map((item, i) => (
-              <li key={item} style={{ ['--d' as string]: `${1600 + i * 200}ms`, ['--d2' as string]: `${1850 + i * 200}ms` } as CSSProperties}>
+              <li key={item} style={{ ['--d' as string]: `${ms(1600 + i * 200)}ms`, ['--d2' as string]: `${ms(1850 + i * 200)}ms` } as CSSProperties}>
                 <span>
                   <Check size={14} strokeWidth={3} />
                 </span>
@@ -316,7 +337,7 @@ export function About() {
   )
 }
 
-const abCss = `
+const abCssRaw = `
 .about-section { position: relative; isolation: isolate; }
 .about-gallery, .about-copy, .about-image, .trust-badge { contain: layout; }
 .about-section .about-image { overflow: hidden; }
@@ -631,6 +652,8 @@ const abCss = `
 .ab-static .promise-list li::after { opacity: 0.55; transform: none; }
 .ab-static .about-image img { translate: 0 0; }
 `
+
+const abCss = speedUp(abCssRaw)
 
 
 

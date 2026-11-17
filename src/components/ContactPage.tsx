@@ -2,6 +2,7 @@ import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
 import { ArrowRight, Check, ChevronDown, Clock, MapPin, MessageCircle, Phone, Send, User, Smartphone } from 'lucide-react'
 import { brand } from '../data/site-data'
 import { rangeProducts } from '../data/products-page-data'
+import {   type CSSProperties } from 'react'
 
 /* ---------- Content ---------- */
 
@@ -52,6 +53,36 @@ function isOpenNow() {
 
 /* ---------- Sections ---------- */
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export function ContactHero() {
   return (
     <section className="page-hero cx-hero">
@@ -74,6 +105,66 @@ export function ContactHero() {
   )
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   EnquirySection — bright form border + glowing inputs,
+   written as INLINE STYLES (no stylesheet needed).
+
+   HOW TO USE
+   1. In your Contact file, replace the old `EnquirySection`
+      function with the code below (keep `type Values` / `type Errors`
+      once, and keep your existing helpers: normalizePhone,
+      productFromUrl, productOptions, promises, brand imports).
+   2. Add `type CSSProperties` to your react import:
+        import { useEffect, useState, type ChangeEvent, type CSSProperties, type FormEvent } from 'react'
+
+   WHY A TINY <style> TAG IS STILL THERE
+   Inline style attributes cannot contain @keyframes, so the two
+   animation names used below ("cx-breathe" and "cx-card-glow") are
+   declared in one small <style> element. Everything else (borders,
+   glow, hover, focus, error colours) is plain inline style, driven
+   by React state (which field is focused / hovered).
+   ========================================================= */
+
 type Values = { name: string; phone: string; address: string; product: string; quantity: string; message: string }
 type Errors = Partial<Record<'name' | 'phone' | 'address' | 'product', string>>
 
@@ -81,11 +172,15 @@ export function EnquirySection() {
   const [values, setValues] = useState<Values>({ name: '', phone: '', address: '', product: '', quantity: '', message: '' })
   const [errors, setErrors] = useState<Errors>({})
   const [sent, setSent] = useState(false)
+  const [focus, setFocus] = useState<string | null>(null)
+  const [hover, setHover] = useState<string | null>(null)
+  const [calm, setCalm] = useState(false) // true when the visitor prefers reduced motion
 
   // Arriving from a "Get quote" button on the Products page pre-selects that product.
   useEffect(() => {
     const product = productFromUrl()
     if (product) setValues((current) => ({ ...current, product }))
+    setCalm(window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   }, [])
 
   function validate(next: Values): Errors {
@@ -136,10 +231,74 @@ export function EnquirySection() {
   })
   const error = (key: keyof Errors) => errors[key] ? <p className="cx-error" id={`cx-${key}-error`} role="alert">{errors[key]}</p> : null
 
+  /* ---------- INLINE GLOW STYLES ---------- */
+
+  const YELLOW = '255 196 0'
+  const RED = '227 6 19'
+
+  /** Style for a field (or the wrapper around it): idle / hover / focus / error. */
+  const glow = (key: string, invalid = false): CSSProperties => {
+    const c = invalid ? RED : YELLOW
+    const on = focus === key
+    const hov = hover === key
+    return {
+      border: `2px solid rgb(${c} / ${on ? 100 : hov ? 90 : invalid ? 100 : 60}%)`,
+      borderRadius: 10,
+      outline: 'none',
+      background: on ? `rgb(${c} / 6%)` : undefined,
+      transition: 'border-color .25s ease, box-shadow .25s ease, background-color .25s ease',
+      boxShadow: on
+        ? `0 0 0 4px rgb(${c} / 28%), 0 0 20px 3px rgb(${c} / 55%)`
+        : hov
+          ? `0 0 10px 1px rgb(${c} / 35%)`
+          : invalid
+            ? `0 0 0 4px rgb(${c} / 20%), 0 0 18px 2px rgb(${c} / 45%)`
+            : 'none',
+      animation: on && !calm ? 'cx-breathe 2.2s ease-in-out infinite' : undefined,
+    }
+  }
+
+  /** Focus + hover handlers for one field. Put them on the element (or its wrapper). */
+  const bind = (key: string) => ({
+    onFocus: () => setFocus(key),
+    onBlur: () => setFocus((current) => (current === key ? null : current)),
+    onMouseEnter: () => setHover(key),
+    onMouseLeave: () => setHover((current) => (current === key ? null : current)),
+  })
+
+  /** The inner <input> inside an icon wrapper has no border of its own: the wrapper carries it. */
+  const bare: CSSProperties = { border: 0, outline: 'none', boxShadow: 'none', background: 'transparent' }
+
+  /** Icon colour lights up with the glow. */
+  const icon = (key: string): CSSProperties => ({
+    color: focus === key ? `rgb(${YELLOW})` : undefined,
+    filter: focus === key ? `drop-shadow(0 0 5px rgb(${YELLOW} / 80%))` : undefined,
+    transition: 'color .25s ease, filter .25s ease',
+  })
+
+  /** The form card: bright border, outer halo, gentle pulsing glow. */
+  const cardStyle: CSSProperties = {
+    border: '3px solid rgb(255 196 0)',
+    boxShadow: `0 0 0 4px rgb(${YELLOW} / 18%), 0 0 26px 2px rgb(${YELLOW} / 40%), 0 24px 50px rgb(15 42 85 / 16%)`,
+    animation: calm ? undefined : 'cx-card-glow 3s ease-in-out infinite',
+  }
+
   return (
     <section className="cx-enquiry" id="enquiry">
+      {/* only the keyframes live here: inline style attributes cannot hold @keyframes */}
+      <style>{`
+        @keyframes cx-breathe {
+          0%, 100% { box-shadow: 0 0 0 4px rgb(255 196 0 / 24%), 0 0 14px 2px rgb(255 196 0 / 45%); }
+          50% { box-shadow: 0 0 0 6px rgb(255 196 0 / 34%), 0 0 28px 6px rgb(255 196 0 / 70%); }
+        }
+        @keyframes cx-card-glow {
+          0%, 100% { border-color: rgb(255 196 0); box-shadow: 0 0 0 4px rgb(255 196 0 / 18%), 0 0 22px 2px rgb(255 196 0 / 34%), 0 24px 50px rgb(15 42 85 / 16%); }
+          50% { border-color: rgb(255 226 102); box-shadow: 0 0 0 6px rgb(255 196 0 / 28%), 0 0 40px 8px rgb(255 196 0 / 58%), 0 24px 50px rgb(15 42 85 / 16%); }
+        }
+      `}</style>
+
       <div className="container cx-grid">
-        <div className="cx-form-card reveal">
+        <div className="cx-form-card reveal" style={cardStyle}>
           <span className="eyebrow">Enquiry form</span>
           <h2>Tell us what you need</h2>
           <p className="cx-form-lead">Fill this in and press <strong>Send on WhatsApp</strong>. Your details open as a ready-made message in WhatsApp — just hit send, and we reply with the rate and delivery date.</p>
@@ -147,24 +306,32 @@ export function EnquirySection() {
             <div className="cx-row">
               <div className="cx-field">
                 <label htmlFor="cx-name">Name <span className="cx-req">*</span></label>
-                <div className="cx-input"><User size={16} aria-hidden="true" /><input id="cx-name" name="name" type="text" autoComplete="name" placeholder="Your full name" value={values.name} {...fieldProps('name')} /></div>
+                <div className="cx-input" style={glow('name', !!errors.name)} {...bind('name')}>
+                  <User size={16} aria-hidden="true" style={icon('name')} />
+                  <input id="cx-name" name="name" type="text" autoComplete="name" placeholder="Your full name" value={values.name} style={bare} {...fieldProps('name')} />
+                </div>
                 {error('name')}
               </div>
               <div className="cx-field">
                 <label htmlFor="cx-phone">Mobile number <span className="cx-req">*</span></label>
-                <div className="cx-input"><Smartphone size={16} aria-hidden="true" /><input id="cx-phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" placeholder="10-digit mobile number" value={values.phone} {...fieldProps('phone')} /></div>
+                <div className="cx-input" style={glow('phone', !!errors.phone)} {...bind('phone')}>
+                  <Smartphone size={16} aria-hidden="true" style={icon('phone')} />
+                  <input id="cx-phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" placeholder="10-digit mobile number" value={values.phone} style={bare} {...fieldProps('phone')} />
+                </div>
                 {error('phone')}
               </div>
             </div>
+
             <div className="cx-field">
               <label htmlFor="cx-address">Address / site location <span className="cx-req">*</span></label>
-              <textarea id="cx-address" name="address" rows={3} autoComplete="street-address" placeholder="Village / town, taluk and district where the material has to be delivered" value={values.address} {...fieldProps('address')} />
+              <textarea id="cx-address" name="address" rows={3} autoComplete="street-address" placeholder="Village / town, taluk and district where the material has to be delivered" value={values.address} style={glow('address', !!errors.address)} {...bind('address')} {...fieldProps('address')} />
               {error('address')}
             </div>
+
             <div className="cx-row">
               <div className="cx-field">
                 <label htmlFor="cx-product">Which bricks / blocks do you need? <span className="cx-req">*</span></label>
-                <select id="cx-product" name="product" value={values.product} {...fieldProps('product')}>
+                <select id="cx-product" name="product" value={values.product} style={glow('product', !!errors.product)} {...bind('product')} {...fieldProps('product')}>
                   <option value="">— Select a product —</option>
                   {productOptions.map((option) => <option key={option} value={option}>{option}</option>)}
                 </select>
@@ -172,13 +339,15 @@ export function EnquirySection() {
               </div>
               <div className="cx-field">
                 <label htmlFor="cx-quantity">Approx. quantity <span className="cx-opt">(optional)</span></label>
-                <input id="cx-quantity" name="quantity" type="text" placeholder="e.g. 2000 nos / 3 loads" value={values.quantity} onChange={handleChange} />
+                <input id="cx-quantity" name="quantity" type="text" placeholder="e.g. 2000 nos / 3 loads" value={values.quantity} style={glow('quantity')} {...bind('quantity')} onChange={handleChange} />
               </div>
             </div>
+
             <div className="cx-field">
               <label htmlFor="cx-message">Message <span className="cx-opt">(optional)</span></label>
-              <textarea id="cx-message" name="message" rows={3} placeholder="Sizes, colours, expected delivery date, or anything else we should know" value={values.message} onChange={handleChange} />
+              <textarea id="cx-message" name="message" rows={3} placeholder="Sizes, colours, expected delivery date, or anything else we should know" value={values.message} style={glow('message')} {...bind('message')} onChange={handleChange} />
             </div>
+
             <button className="cx-submit" type="submit"><Send size={17} aria-hidden="true" /> Send enquiry on WhatsApp</button>
             <p className="cx-status" role="status" aria-live="polite">
               {sent ? <><Check size={15} aria-hidden="true" /> WhatsApp is opening with your enquiry — just press Send.</> : null}
@@ -207,6 +376,53 @@ export function EnquirySection() {
     </section>
   )
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 export function InfoCards() {
   const [open, setOpen] = useState<boolean | null>(null)
